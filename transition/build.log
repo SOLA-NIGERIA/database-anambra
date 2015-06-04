@@ -1,0 +1,64 @@
+Starting Build at 10:49:22.11 
+CREATE FUNCTION
+ALTER FUNCTION
+psql:../transition/administrative_getParcelShare.sql:1: ERROR:  cannot drop function administrative.get_parcel_share(character varying) because other objects depend on it
+DETAIL:  view application.systematic_registration_certificates depends on function administrative.get_parcel_share(character varying)
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
+CREATE FUNCTION
+ALTER FUNCTION
+INSERT 0 1
+UPDATE 1
+psql:../transition/party_stateTable.sql:1: NOTICE:  table "state_type" does not exist, skipping
+DROP TABLE
+psql:../transition/party_stateTable.sql:13: NOTICE:  CREATE TABLE / PRIMARY KEY will create implicit index "state_type_pkey" for table "state_type"
+CREATE TABLE
+ALTER TABLE
+COMMENT
+SET
+SET
+SET
+SET
+SET
+SET
+SET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Finished at 10:49:29.58 
