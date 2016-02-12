@@ -1,8 +1,8 @@
-﻿INSERT INTO system.version SELECT '1602a' WHERE NOT EXISTS (SELECT version_num FROM system.version WHERE version_num = '1510a');
+INSERT INTO system.version SELECT '1602a' WHERE NOT EXISTS (SELECT version_num FROM system.version WHERE version_num = '1510a');
 --
 -- PostgreSQL database dump
 --
-  
+   
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
@@ -3498,31 +3498,46 @@ ALTER TABLE system.language DISABLE TRIGGER ALL;
 ALTER TABLE system.language ADD COLUMN ltr boolean DEFAULT true NOT NULL;
 ALTER TABLE system.language ENABLE TRIGGER ALL;
 
-ALTER TABLE approle_appgroup DISABLE TRIGGER ALL;
+ALTER TABLE system.approle_appgroup DISABLE TRIGGER ALL;
 ALTER TABLE system.approle_appgroup ADD COLUMN rowidentifier character varying(40) DEFAULT public.uuid_generate_v1() NOT NULL;
 ALTER TABLE system.approle_appgroup ADD COLUMN rowversion integer DEFAULT 0 NOT NULL;
 ALTER TABLE system.approle_appgroup ADD COLUMN change_action character(1) DEFAULT 'i'::bpchar NOT NULL;
 ALTER TABLE system.approle_appgroup ADD COLUMN change_user character varying(50);
 ALTER TABLE system.approle_appgroup ADD COLUMN    change_time timestamp without time zone DEFAULT now() NOT NULL;
-ALTER TABLE approle_appgroup ENABLE TRIGGER ALL;
+ALTER TABLE system.approle_appgroup ENABLE TRIGGER ALL;
 
 
-ALTER TABLE appuser DISABLE TRIGGER ALL;
+ALTER TABLE system.appuser DISABLE TRIGGER ALL;
 ALTER TABLE system.appuser ADD COLUMN email character varying(40);
 ALTER TABLE system.appuser ADD COLUMN     mobile_number character varying(20);
 ALTER TABLE system.appuser ADD COLUMN     activation_code character varying(40);
 ALTER TABLE system.appuser ADD COLUMN     activation_expiration timestamp without time zone;
-ALTER TABLE appuser ENABLE TRIGGER ALL;
+ALTER TABLE system.appuser ENABLE TRIGGER ALL;
 
-ALTER TABLE appuser_appgroup DISABLE TRIGGER ALL;
+ALTER TABLE system.appuser_appgroup DISABLE TRIGGER ALL;
 ALTER TABLE system.appuser_appgroup ADD COLUMN rowidentifier character varying(40) DEFAULT public.uuid_generate_v1() NOT NULL;
 ALTER TABLE system.appuser_appgroup ADD COLUMN rowversion integer DEFAULT 0 NOT NULL;
 ALTER TABLE system.appuser_appgroup ADD COLUMN change_action character(1) DEFAULT 'i'::bpchar NOT NULL;
 ALTER TABLE system.appuser_appgroup ADD COLUMN change_user character varying(50);
 ALTER TABLE system.appuser_appgroup ADD COLUMN    change_time timestamp without time zone DEFAULT now() NOT NULL;
-ALTER TABLE appuser_appgroup ENABLE TRIGGER ALL;
+ALTER TABLE system.appuser_appgroup ENABLE TRIGGER ALL;
+
+---HISTORIC TABLES ------------------------------------
 
 
+ALTER TABLE system.appuser_historic DISABLE TRIGGER ALL;
+ALTER TABLE system.appuser_historic ADD COLUMN email character varying(40);
+ALTER TABLE system.appuser_historic ADD COLUMN     mobile_number character varying(20);
+ALTER TABLE system.appuser_historic ADD COLUMN     activation_code character varying(40);
+ALTER TABLE system.appuser_historic ADD COLUMN     activation_expiration timestamp without time zone;
+ALTER TABLE system.appuser_historic ENABLE TRIGGER ALL;
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
 
 INSERT INTO setting (name, vl, active, description) VALUES ('moderation_date', '2015-01-01', true, 'Closing date of public display for the claims. Date must be set in the format "yyyy-mm-dd". If date is not set or in the past, "moderation-days" setting will be used for calculating closing date.');
 INSERT INTO setting (name, vl, active, description) VALUES ('requires_spatial', '0', true, 'Indicates whether spatial representation of the parcel is required (mandatory). If values is 0, spatial part can be omitted, otherwise validation will request it.');
