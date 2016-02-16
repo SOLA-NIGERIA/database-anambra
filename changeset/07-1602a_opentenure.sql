@@ -14,7 +14,7 @@ SET client_min_messages = warning;
 --
 
 CREATE SCHEMA opentenure;
-
+ 
 
 ALTER SCHEMA opentenure OWNER TO postgres;
 

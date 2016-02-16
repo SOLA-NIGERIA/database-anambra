@@ -28,7 +28,7 @@ COMMENT ON FUNCTION opentenure.generate_form_name() IS 'Generates dynamic form n
 -- Function: opentenure.f_for_trg_set_default()
 
 -- DROP FUNCTION opentenure.f_for_trg_set_default();
-
+ 
 CREATE OR REPLACE FUNCTION opentenure.f_for_trg_set_default()
   RETURNS trigger AS
 $BODY$

@@ -12,7 +12,7 @@ ALTER TABLE administrative.rrr_type
   ADD COLUMN "rrr_panel_code" character varying(20);
 
 
-
+ 
 
 
 INSERT INTO system.setting(
