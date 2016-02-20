@@ -1,7 +1,6 @@
-﻿
+
 -- Function: get_geometry_with_srid(geometry)
- 
--- DROP FUNCTION get_geometry_with_srid(geometry);
+DROP FUNCTION get_geometry_with_srid(geometry);
 
 CREATE OR REPLACE FUNCTION get_geometry_with_srid(geom geometry)
   RETURNS geometry AS
@@ -12,50 +11,19 @@ declare
  last_part geometry;
  newGeom geometry;
 begin
-
-  
-
-  ----if (select count(*) from system.crs) = 1 then
-  ----  return geom;
+   ----if (select count(*) from system.crs) = 1 then
+       -- srid_found = (select srid from system.crs);
+       -- last_part := ST_SetSRID(geom,srid_found);
   ----end if;
+x = st_x(st_transform(st_centroid(last_part), 4326));
+srid_found = (select srid from system.crs where x >= from_long and x < to_long );
 
-
---srid_found = (select srid from system.crs);
---
-   last_part := ST_SetSRID(geom,32632);
-
-   select into newGeom
-   ST_Transform(
-   ST_GeomFromText(
-   ST_AsText(last_part),4326),32632);
-
-  x = st_x(st_transform(st_centroid(last_part), 4326));
-  srid_found = (select srid from system.crs where x >= from_long and x < to_long );
-
-
-  return st_transform(last_part, 26332);
-
-
-
-
- --select into newGeom
- --ST_Length(ST_Transform(
- --ST_GeomFromText(
- --ST_AsText(geom),4326),32632));
-
---   select into newGeom
-  -- ST_Transform(
-   --ST_GeomFromText(
-   --ST_AsText(last_part),4326),32632);
-
-
-  --x = st_x(st_transform(st_centroid(geom), 4326));
-  --srid_found = (select srid from system.crs where x >= from_long and x < to_long );
+ --srid_found = (select srid from system.crs);
+ last_part := ST_SetSRID(geom,srid_found);
   
- -- return ST_AsText(ST_Transform(
-   --ST_GeomFromText(
-   --ST_AsText(geom),4326),32632));
-   --return newGeom;
+return  ST_Transform(
+   ST_GeomFromText(
+   ST_AsText(last_part),4326),32632);  ---3857
 end;
 
 $BODY$
@@ -65,6 +33,8 @@ ALTER FUNCTION get_geometry_with_srid(geometry)
   OWNER TO postgres;
 COMMENT ON FUNCTION get_geometry_with_srid(geometry) IS 'This function assigns a srid found in the settings to the geometry passed as parameter. The srid is chosen based in the longitude where the centroid of the geometry is.';
 
+
+DROP FUNCTION cadastre.get_new_cadastre_object_identifier_last_part(geometry, character varying);
 
 
 CREATE OR REPLACE FUNCTION cadastre.get_new_cadastre_object_identifier_last_part(geom geometry, cadastre_object_type character varying)
@@ -78,11 +48,9 @@ begin
  
  
   srid_found = (select srid from system.crs);
-  
-
-   last_part := ST_SetSRID(geom,srid_found);
- 
- if cadastre_object_type = 'mapped_geometry' then   
+  last_part := ST_SetSRID(geom,srid_found);
+   
+ if cadastre_object_type != 'mapped_geometry' then   
    select name 
    into val_to_return
    from cadastre.spatial_unit_group sg
