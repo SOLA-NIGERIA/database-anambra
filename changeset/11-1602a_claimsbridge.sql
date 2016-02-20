@@ -11,14 +11,17 @@ declare
  last_part geometry;
  newGeom geometry;
 begin
-   ----if (select count(*) from system.crs) = 1 then
+
+   
+
+  ----if (select count(*) from system.crs) = 1 then
        -- srid_found = (select srid from system.crs);
        -- last_part := ST_SetSRID(geom,srid_found);
   ----end if;
-x = st_x(st_transform(st_centroid(last_part), 4326));
-srid_found = (select srid from system.crs where x >= from_long and x < to_long );
+--x = st_x(st_transform(st_centroid(last_part), 4326));
+--srid_found = (select srid from system.crs where x >= from_long and x < to_long );
 
- --srid_found = (select srid from system.crs);
+ srid_found = (select srid from system.crs);
  last_part := ST_SetSRID(geom,srid_found);
   
 return  ST_Transform(
