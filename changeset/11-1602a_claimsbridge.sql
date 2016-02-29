@@ -1,3 +1,243 @@
+ALTER TABLE document.document
+  ADD COLUMN mime_type character varying(255);
+
+ALTER TABLE document.document_historic
+  ADD COLUMN mime_type character varying(255);
+
+  
+
+--
+-- Name: email; Type: TABLE; Schema: system; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE system.email (
+    id character varying(40) NOT NULL,
+    recipient character varying(255) NOT NULL,
+    recipient_name character varying(255),
+    cc character varying(5000),
+    bcc character varying(5000),
+    subject character varying(250) NOT NULL,
+    body character varying(8000) NOT NULL,
+    attachment bytea,
+    attachment_mime_type character varying(250),
+    attachment_name character varying(250),
+    time_to_send timestamp without time zone DEFAULT now() NOT NULL,
+    attempt integer DEFAULT 1 NOT NULL,
+    error character varying(5000)
+);
+
+
+ALTER TABLE system.email OWNER TO postgres;
+
+--
+-- Name: TABLE email; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON TABLE system.email IS 'Table for email messages to be sent.';
+
+
+--
+-- Name: COLUMN email.id; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.id IS 'Unique identifier of the record.';
+
+
+--
+-- Name: COLUMN email.recipient; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.recipient IS 'Email address of recipient.';
+
+
+--
+-- Name: COLUMN email.recipient_name; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.recipient_name IS 'Name of recipient.';
+
+
+--
+-- Name: COLUMN email.cc; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.cc IS 'List of names and email address to send a copy of the message';
+
+
+--
+-- Name: COLUMN email.bcc; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.bcc IS 'List of names and email address to send a blind copy of the message';
+
+
+--
+-- Name: COLUMN email.subject; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.subject IS 'Subject of the message';
+
+
+--
+-- Name: COLUMN email.body; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.body IS 'Message body';
+
+
+--
+-- Name: COLUMN email.attachment; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.attachment IS 'Attachment file to send';
+
+
+--
+-- Name: COLUMN email.attachment_mime_type; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.attachment_mime_type IS 'attachment_mime_type';
+
+
+--
+-- Name: COLUMN email.attachment_name; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.attachment_name IS 'Attachment file name';
+
+
+--
+-- Name: COLUMN email.time_to_send; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.time_to_send IS 'Date and time when to send the message.';
+
+
+--
+-- Name: COLUMN email.attempt; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.attempt IS 'Number of attempt of sending message.';
+
+
+--
+-- Name: COLUMN email.error; Type: COMMENT; Schema: system; Owner: postgres
+--
+
+COMMENT ON COLUMN system.email.error IS 'Error message received when sending the message.';
+
+
+
+
+
+--
+-- Name: document_chunk; Type: TABLE; Schema: document; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE document.document_chunk (
+    id character varying(40) DEFAULT public.uuid_generate_v1() NOT NULL,
+    document_id character varying(40) NOT NULL,
+    claim_id character varying(40),
+    start_position bigint NOT NULL,
+    size bigint NOT NULL,
+    body bytea NOT NULL,
+    md5 character varying(50),
+    creation_time timestamp without time zone DEFAULT now() NOT NULL,
+    user_name character varying(50) NOT NULL
+);
+
+
+ALTER TABLE document.document_chunk OWNER TO postgres;
+
+--
+-- Name: TABLE document_chunk; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON TABLE document.document_chunk IS 'Holds temporary pieces of a document uploaded on the server. In case of large files, document can be split into smaller pieces (chunks) allowing reliable upload. After all pieces uploaded, client will instruct server to create a document and remove temporary files stored in this table.';
+
+
+--
+-- Name: COLUMN document_chunk.id; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.id IS 'Unique ID of the chunk';
+
+
+--
+-- Name: COLUMN document_chunk.document_id; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.document_id IS 'Document ID, which will be used to create final document object. Used to group all chunks together.';
+
+
+--
+-- Name: COLUMN document_chunk.claim_id; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.claim_id IS 'Claim ID. Used to clean the table when saving claim. It will guarantee that no orphan chunks left in the table.';
+
+
+--
+-- Name: COLUMN document_chunk.start_position; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.start_position IS 'Staring position of the byte in the source/destination document';
+
+
+--
+-- Name: COLUMN document_chunk.size; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.size IS 'Size of the chunk in bytes.';
+
+
+--
+-- Name: COLUMN document_chunk.body; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.body IS 'The content of the chunk.';
+
+
+--
+-- Name: COLUMN document_chunk.md5; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.md5 IS 'Checksum of the chunk, calculated using MD5.';
+
+
+--
+-- Name: COLUMN document_chunk.creation_time; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.creation_time IS 'Date and time when chuck was created.';
+
+
+--
+-- Name: COLUMN document_chunk.user_name; Type: COMMENT; Schema: document; Owner: postgres
+--
+
+COMMENT ON COLUMN document.document_chunk.user_name IS 'User''s id (name), who has loaded the chunk';
+
+
+
+--
+-- Name: id_pkey_document_chunk; Type: CONSTRAINT; Schema: document; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY document.document_chunk
+    ADD CONSTRAINT id_pkey_document_chunk PRIMARY KEY (id);
+
+
+--
+-- Name: start_unique_document_chunk; Type: CONSTRAINT; Schema: document; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY document.document_chunk
+    ADD CONSTRAINT start_unique_document_chunk UNIQUE (document_id, start_position);
+
+
+  
+  
 -- br generate spatial unit group name
 update system.br_definition set body = 'SELECT cadastre.generate_spatial_unit_group_name(get_geometry_with_srid(#{geom_v}), #{hierarchy_level_v}, #{label_v}) AS vl'
 where br_id = 'generate-spatial-unit-group-name';
