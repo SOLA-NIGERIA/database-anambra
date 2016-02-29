@@ -1,3 +1,7 @@
+-- br generate spatial unit group name
+update system.br_definition set body = 'SELECT cadastre.generate_spatial_unit_group_name(get_geometry_with_srid(#{geom_v}}), #{hierarchy_level_v}, #{label_v}) AS vl'
+where br_id = 'generate-spatial-unit-group-name';
+
 -- Function: get_geometry_with_srid(geometry)
 
 ---DROP FUNCTION get_geometry_with_srid(geometry);
