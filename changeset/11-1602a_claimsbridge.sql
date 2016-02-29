@@ -1,8 +1,34 @@
-
 -- Function: get_geometry_with_srid(geometry)
-DROP FUNCTION get_geometry_with_srid(geometry);
+
+---DROP FUNCTION get_geometry_with_srid(geometry);
 
 CREATE OR REPLACE FUNCTION get_geometry_with_srid(geom geometry)
+  RETURNS geometry AS
+$BODY$
+declare
+  srid_found integer;
+  x float;
+begin
+  if (select count(*) from system.crs) = 1 then
+    return geom;
+  end if;
+  x = st_x(st_transform(st_centroid(geom), 4326));
+  srid_found = (select srid from system.crs where x >= from_long and x < to_long );
+  return st_transform(geom, srid_found);
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION get_geometry_with_srid(geometry)
+  OWNER TO postgres;
+COMMENT ON FUNCTION get_geometry_with_srid(geometry) IS 'This function assigns a srid found in the settings to the geometry passed as parameter. The srid is chosen based in the longitude where the centroid of the geometry is.';
+
+
+
+-- Function: get_geometry_with_srid(geometry)
+--DROP FUNCTION get_geometry_with_srid(geometry, hierarchy_level_v integer);
+
+CREATE OR REPLACE FUNCTION get_geometry_with_srid(geom geometry, hierarchy_level_v integer)
   RETURNS geometry AS
 $BODY$
 declare
@@ -32,11 +58,13 @@ end;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION get_geometry_with_srid(geometry)
+ALTER FUNCTION get_geometry_with_srid(geometry, integer)
   OWNER TO postgres;
-COMMENT ON FUNCTION get_geometry_with_srid(geometry) IS 'This function assigns a srid found in the settings to the geometry passed as parameter. The srid is chosen based in the longitude where the centroid of the geometry is.';
+COMMENT ON FUNCTION get_geometry_with_srid(geometry, integer) IS 'This function assigns a srid found in the settings to the geometry passed as parameter. The srid is chosen based in the longitude where the centroid of the geometry is.';
 
 
+-----------------------------------
+------------------------------------
 DROP FUNCTION cadastre.get_new_cadastre_object_identifier_last_part(geometry, character varying);
 
 
