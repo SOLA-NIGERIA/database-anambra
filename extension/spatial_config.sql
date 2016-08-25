@@ -290,27 +290,27 @@ CREATE OR REPLACE VIEW application.systematic_registration_certificates AS
     application.service s
   WHERE sg.hierarchy_level = 5 AND st_intersects(st_pointonsurface(co.geom_polygon), sg.geom) AND (co.name_firstpart::text || co.name_lastpart::text) = (ap.name_firstpart::text || ap.name_lastpart::text) AND (co.name_firstpart::text || co.name_lastpart::text) = (bu.name_firstpart::text || bu.name_lastpart::text) AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text AND (aa.status_code::text = 'approved'::text OR aa.status_code::text = 'archived'::text) AND bu.id::text = su.ba_unit_id::text AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text AND COALESCE(bu.land_use_code, 'res_home'::character varying)::text = lu.code::text
   ORDER BY co.name_firstpart, co.name_lastpart;
-
+ 
   
   -- Creates wrapper functions for those PostGIS 1.5
  -- functions used by SOLA that have been deprecated
  -- or removed from PostGIS 2.0
 
+-- this is no more needed because it is included in upper postgis version
+  --  CREATE OR REPLACE FUNCTION public.st_3dmakebox (
+    --- geom1 public.geometry,
+    -- geom2 public.geometry
+   -- )
+   -- RETURNS public.box3d AS
+    --'$libdir/postgis-2.0', 'BOX3D_construct'
+    --LANGUAGE 'c'
+    --IMMUTABLE
+    --RETURNS NULL ON NULL INPUT
+    --SECURITY INVOKER
+    --COST 1;
 
-    CREATE OR REPLACE FUNCTION public.st_3dmakebox (
-     geom1 public.geometry,
-     geom2 public.geometry
-    )
-    RETURNS public.box3d AS
-    '$libdir/postgis-2.0', 'BOX3D_construct'
-    LANGUAGE 'c'
-    IMMUTABLE
-    RETURNS NULL ON NULL INPUT
-    SECURITY INVOKER
-    COST 1;
-
-    COMMENT ON FUNCTION public.st_3dmakebox(geom1 public.geometry, geom2 public.geometry)
-    IS 'args: point3DLowLeftBottom, point3DUpRightTop - Creates a BOX3D defined by the given 3d point geometries.'; 
+    --COMMENT ON FUNCTION public.st_3dmakebox(geom1 public.geometry, geom2 public.geometry)
+    --IS 'args: point3DLowLeftBottom, point3DUpRightTop - Creates a BOX3D defined by the given 3d point geometries.'; 
 
 
 
