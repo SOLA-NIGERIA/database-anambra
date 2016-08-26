@@ -1,6 +1,49 @@
 ----  STATUS OF THE SLTR CLAIM ----
-  
 
+ 
+ --select sltr_status from application.sltr_status where id = '693d5a00-4d89-4dee-bb6f-abaf9c0acb1d';
+-- View: application.systematic_registration_certificates
+--DROP VIEW application.sltr_status;
+   CREATE OR REPLACE VIEW application.sltr_status AS 
+   SELECT DISTINCT aa.id as id,
+           CASE 
+           WHEN (s.status_code::text = 'lodged' and aa.status_code = 'lodged') THEN  'Sltr Claim application lodged'
+           WHEN (s.status_code::text = 'pending' and aa.status_code = 'lodged') THEN  'entering Sltr Claim details'
+           WHEN (s.status_code::text = 'completed' and aa.status_code = 'lodged') THEN  'ready for public display'
+           WHEN (s.status_code::text = 'completed' and aa.status_code = 'lodged' and (swu.public_display_start_date is not null and (current_date > swu.public_display_start_date and current_date < (swu.public_display_start_date + cast(vl as int))))) THEN  'In Public Display'
+           WHEN (s.status_code::text = 'completed' and aa.status_code = 'approved') THEN  'Public Display period completed'
+           WHEN (s.status_code::text = 'completed' and aa.status_code = 'approved' 
+						and sg.name in(select ss.reference_nr 
+					        from   source.source ss 
+					        where  ss.type_code='title'
+				                and ss.reference_nr = sg.name
+                                                )  ) THEN  'Certificates Generated'
+                                         
+           ELSE 'other'
+           END as sltr_status
+           FROM  
+           cadastre.cadastre_object co, 
+            administrative.ba_unit_contains_spatial_unit su, 
+            application.application_property ap, 
+            application.application aa, 
+            application.service s, 
+            administrative.ba_unit bu, 
+            cadastre.spatial_unit_group sg,
+            cadastre.sr_work_unit swu, 
+            system.setting set
+           WHERE (co.name_firstpart::text || co.name_lastpart::text) = (ap.name_firstpart::text || ap.name_lastpart::text) 
+           AND (co.name_firstpart::text || co.name_lastpart::text) = (bu.name_firstpart::text || bu.name_lastpart::text) 
+           AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text AND s.request_type_code::text = 'systematicRegn'::text 
+           AND su.spatial_unit_id::text = co.id::text 
+           AND (ap.ba_unit_id::text = su.ba_unit_id::text OR ap.name_lastpart::text = bu.name_lastpart::text AND ap.name_firstpart::text = bu.name_firstpart::text) 
+           AND (s.status_code::text = 'completed'::text or s.status_code::text = 'pending'::text or s.status_code::text = 'lodged'::text)
+           AND bu.id::text = su.ba_unit_id::text 
+           AND sg.hierarchy_level = 4 AND st_intersects(st_pointonsurface(co.geom_polygon), sg.geom)
+           AND sg.name = swu.name
+           AND set.name = 'public-notification-duration'
+;
+
+ 
 -- View: application.systematic_registration_certificates
 DROP VIEW application.systematic_registration_certificates;
    CREATE OR REPLACE VIEW application.systematic_registration_certificates AS 
