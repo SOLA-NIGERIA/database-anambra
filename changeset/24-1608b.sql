@@ -1,15 +1,15 @@
 ----  STATUS OF THE SLTR CLAIM ----
-
  
+  
  --select sltr_status from application.sltr_status where id = '693d5a00-4d89-4dee-bb6f-abaf9c0acb1d';
 -- View: application.systematic_registration_certificates
 --DROP VIEW application.sltr_status;
    CREATE OR REPLACE VIEW application.sltr_status AS 
-   SELECT DISTINCT aa.id as id,
+   SELECT DISTINCT aa.id as appid,
            CASE 
            WHEN (s.status_code::text = 'lodged' and aa.status_code = 'lodged') THEN  'Sltr Claim application lodged'
-           WHEN (s.status_code::text = 'pending' and aa.status_code = 'lodged') THEN  'entering Sltr Claim details'
-           WHEN (s.status_code::text = 'completed' and aa.status_code = 'lodged') THEN  'ready for public display'
+           WHEN (s.status_code::text = 'pending' and aa.status_code = 'lodged') THEN  'Entering Sltr Claim details'
+           WHEN (s.status_code::text = 'completed' and aa.status_code = 'lodged') THEN  'Ready for public display'
            WHEN (s.status_code::text = 'completed' and aa.status_code = 'lodged' and (swu.public_display_start_date is not null and (current_date > swu.public_display_start_date and current_date < (swu.public_display_start_date + cast(vl as int))))) THEN  'In Public Display'
            WHEN (s.status_code::text = 'completed' and aa.status_code = 'approved') THEN  'Public Display period completed'
            WHEN (s.status_code::text = 'completed' and aa.status_code = 'approved' 
@@ -38,10 +38,49 @@
            AND (ap.ba_unit_id::text = su.ba_unit_id::text OR ap.name_lastpart::text = bu.name_lastpart::text AND ap.name_firstpart::text = bu.name_firstpart::text) 
            AND (s.status_code::text = 'completed'::text or s.status_code::text = 'pending'::text or s.status_code::text = 'lodged'::text)
            AND bu.id::text = su.ba_unit_id::text 
-           AND sg.hierarchy_level = 4 AND st_intersects(st_pointonsurface(co.geom_polygon), sg.geom)
+           AND sg.hierarchy_level = 4 AND public.st_intersects(public.st_pointonsurface(co.geom_polygon), sg.geom)
            AND sg.name = swu.name
-           AND set.name = 'public-notification-duration'
-;
+           AND set.name = 'public-notification-duration';
+
+
+
+-- Function: application.getsltrstatus(character varying)
+
+-- DROP FUNCTION application.getsltrstatus(character varying);
+
+CREATE OR REPLACE FUNCTION application.getsltrstatus(inputid character varying)
+  RETURNS character varying AS
+$BODY$
+declare
+  rec record;
+  sltrstatus character varying;
+  
+BEGIN
+
+sltrstatus = '';
+   
+	SELECT  ss.sltr_status 
+	into sltrstatus
+		    FROM  application.sltr_status ss
+			  
+	            WHERE   ss.appid = inputid
+	                    ;
+        if sltrstatus = '' then
+	  sltrstatus = 'not lodged yet ';
+       end if;
+
+	
+return sltrstatus;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION application.getsltrstatus(character varying)
+  OWNER TO postgres;
+
+
+
+
 
  
 -- View: application.systematic_registration_certificates
@@ -49,7 +88,7 @@ DROP VIEW application.systematic_registration_certificates;
    CREATE OR REPLACE VIEW application.systematic_registration_certificates AS 
  SELECT DISTINCT aa.nr, co.name_firstpart, co.name_lastpart, su.ba_unit_id, 
     sg.name::text AS name, aa.id::text AS appid, 
-    aa.change_time AS commencingdate, 
+    --aa.change_time AS commencingdate, 
     "substring"(lu.display_value::text, 0, "position"(lu.display_value::text, '-'::text)) AS landuse, 
     ( SELECT lga.label
            FROM cadastre.spatial_unit_group lga
@@ -84,18 +123,27 @@ DROP VIEW application.systematic_registration_certificates;
           WHERE setting.name::text = 'surveyor'::text) AS surveyor, 
     ( SELECT setting.vl
            FROM system.setting
-          WHERE setting.name::text = 'surveyorRank'::text) AS rank
+          WHERE setting.name::text = 'surveyorRank'::text) AS rank,
+	 zone.display_value										AS zone, 	  
+         rrr.date_commenced										AS commencingdate, 
+         rrr.term											AS term,
+         rrr.yearly_rent										AS  rent
+   
    FROM cadastre.spatial_unit_group sg, cadastre.cadastre_object co, 
     administrative.ba_unit bu, cadastre.land_use_type lu, 
     cadastre.spatial_value_area sa, 
     administrative.ba_unit_contains_spatial_unit su, 
     application.application_property ap, application.application aa, 
-    application.service s
+    application.service s,
+	cadastre.zone_type zone, 
+	administrative.rrr rrr,
+    address.address ad
   WHERE sg.hierarchy_level = 4 AND st_intersects(st_pointonsurface(co.geom_polygon), sg.geom) AND (co.name_firstpart::text || co.name_lastpart::text) = (ap.name_firstpart::text || ap.name_lastpart::text)
    AND (co.name_firstpart::text || co.name_lastpart::text) = (bu.name_firstpart::text || bu.name_lastpart::text) AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text 
    AND s.request_type_code::text = 'systematicRegn'::text AND (aa.status_code::text = 'approved'::text OR aa.status_code::text = 'archived'::text) AND bu.id::text = su.ba_unit_id::text 
    AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text 
    AND COALESCE(bu.land_use_code, 'res_home'::character varying)::text = lu.code::text
+   AND bu.id::text = rrr.ba_unit_id::text AND rrr.zone_code::text = zone.code::text
   ORDER BY co.name_firstpart, co.name_lastpart;
 
 ALTER TABLE application.systematic_registration_certificates
