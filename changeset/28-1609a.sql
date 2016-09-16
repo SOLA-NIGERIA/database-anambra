@@ -1,4 +1,4 @@
-﻿-- View: application.systematic_registration_certificates
+-- View: application.systematic_registration_certificates
 DROP VIEW application.systematic_registration_certificates;
    CREATE OR REPLACE VIEW application.systematic_registration_certificates AS 
  SELECT DISTINCT aa.nr, 
@@ -50,7 +50,7 @@ DROP VIEW application.systematic_registration_certificates;
 			WHEN (rrr.rot_code = 'G') THEN ltr.rent_state_land *size
 		ELSE  	0
 	 END 	 											AS stamp_duty                                                                                  	
-   FROM 
+   FROM   
     cadastre.lga_tarrif_rate ltr,  
     cadastre.spatial_unit_group sg, cadastre.cadastre_object co, 
     administrative.ba_unit bu, cadastre.land_use_type lu, 
