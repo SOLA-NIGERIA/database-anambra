@@ -1,4 +1,4 @@
--- View: application.systematic_registration_certificates
+﻿-- View: application.systematic_registration_certificates
 DROP VIEW application.systematic_registration_certificates;
    CREATE OR REPLACE VIEW application.systematic_registration_certificates AS 
  SELECT DISTINCT aa.nr, co.name_firstpart, co.name_lastpart, su.ba_unit_id, 
@@ -52,7 +52,7 @@ DROP VIEW application.systematic_registration_certificates;
     application.service s,
 	administrative.rrr rrr,
     address.address ad
-  WHERE sg.hierarchy_level = 4 AND st_intersects(st_pointonsurface(co.geom_polygon), sg.geom) AND (co.name_firstpart::text || co.name_lastpart::text) = (ap.name_firstpart::text || ap.name_lastpart::text)
+  WHERE sg.hierarchy_level = 4 AND public.st_intersects(public.st_pointonsurface(co.geom_polygon), sg.geom) AND (co.name_firstpart::text || co.name_lastpart::text) = (ap.name_firstpart::text || ap.name_lastpart::text)
    AND (co.name_firstpart::text || co.name_lastpart::text) = (bu.name_firstpart::text || bu.name_lastpart::text) AND aa.id::text = ap.application_id::text AND s.application_id::text = aa.id::text 
    AND s.request_type_code::text = 'systematicRegn'::text AND (aa.status_code::text = 'approved'::text OR aa.status_code::text = 'archived'::text) AND bu.id::text = su.ba_unit_id::text 
    AND su.spatial_unit_id::text = sa.spatial_unit_id::text AND sa.spatial_unit_id::text = co.id::text AND sa.type_code::text = 'officialArea'::text 
